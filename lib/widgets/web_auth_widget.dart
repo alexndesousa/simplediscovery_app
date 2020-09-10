@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:simplediscovery_app/utils/utils.dart';
 
-class AuthScreen extends StatefulWidget {
+class WebAuthWidget extends StatefulWidget {
   
   final Function callback;
 
-  AuthScreen({@required this.callback});
+  WebAuthWidget({@required this.callback});
 
   @override
-  _AuthScreenState createState() => _AuthScreenState();
+  _WebAuthWidgetState createState() => _WebAuthWidgetState();
 }
 
-class _AuthScreenState extends State<AuthScreen> {
+class _WebAuthWidgetState extends State<WebAuthWidget> {
   WebViewController _controller;
 
   @override

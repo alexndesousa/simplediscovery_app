@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:simplediscovery_app/screens/auth_screen.dart';
 import 'home_page.dart';
 
 void main() {

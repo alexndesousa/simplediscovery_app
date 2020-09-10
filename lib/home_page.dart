@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/auth_screen.dart';
+import 'widgets/web_auth_widget.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -8,6 +8,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String _text = "";
+  bool authenticated = false;
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +37,16 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            IconButton( highlightColor: Colors.red, icon: Icon(Icons.home), onPressed: () => print("home")),
-            IconButton(icon: Icon(Icons.import_export), onPressed: () => print("import pressed")),
-            IconButton(icon: Icon(Icons.search), onPressed: () => print("search pressed")),
+            IconButton(
+                highlightColor: Colors.red,
+                icon: Icon(Icons.home),
+                onPressed: () => print("home")),
+            IconButton(
+                icon: Icon(Icons.import_export),
+                onPressed: () => print("import pressed")),
+            IconButton(
+                icon: Icon(Icons.search),
+                onPressed: () => print("search pressed")),
             IconButton(
                 icon: Padding(
                   padding: const EdgeInsets.all(4.0),
@@ -53,12 +61,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  authCallback(value) => setState(() => _text = value);
+  authCallback(value) => setState(() {
+        _text = value;
+        authenticated = true;
+      });
 
   Route _createRoute() {
     return PageRouteBuilder(
         transitionDuration: Duration(milliseconds: 250),
-        pageBuilder: (context, animation, secondaryAnimation) => AuthScreen(
+        pageBuilder: (context, animation, secondaryAnimation) => WebAuthWidget(
               callback: authCallback,
             ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
