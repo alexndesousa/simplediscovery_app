@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'widgets/custom_nav_bar.dart';
 import 'widgets/web_auth_widget.dart';
 
 class HomePage extends StatefulWidget {
@@ -8,7 +9,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String _text = "";
-  bool authenticated = false;
+  bool authenticated;
+
+  @override
+  void initState() {
+    super.initState();
+    authenticated = false;
+    //here i can check whether or not the user is authenticated from a previous session
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,44 +28,8 @@ class _HomePageState extends State<HomePage> {
         ),
         elevation: 7.0,
       ),
-      body: Container(
-        child: Center(
-          child: Column(
-            children: [
-              FlatButton(
-                onPressed: () => Navigator.push(context, _createRoute()),
-                child: Text("auth"),
-              ),
-              Text(_text)
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            IconButton(
-                highlightColor: Colors.red,
-                icon: Icon(Icons.home),
-                onPressed: () => print("home")),
-            IconButton(
-                icon: Icon(Icons.import_export),
-                onPressed: () => print("import pressed")),
-            IconButton(
-                icon: Icon(Icons.search),
-                onPressed: () => print("search pressed")),
-            IconButton(
-                icon: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.grey,
-                  ),
-                ),
-                onPressed: () => print("profile pressed"))
-          ],
-        ),
-      ),
+      body: !authenticated ? _preAuth() : _postAuth(),
+      bottomNavigationBar: CustomNavBar(),
     );
   }
 
@@ -65,6 +37,36 @@ class _HomePageState extends State<HomePage> {
         _text = value;
         authenticated = true;
       });
+
+  Widget _postAuth() {
+    return Container(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("you have successfully authenticated"),
+            Text("and your auth code is: $_text")
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _preAuth() {
+    return Container(
+      child: Center(
+        child: Column(
+          children: [
+            FlatButton(
+              onPressed: () => Navigator.push(context, _createRoute()),
+              child: Text("auth"),
+            ),
+            Text(_text)
+          ],
+        ),
+      ),
+    );
+  }
 
   Route _createRoute() {
     return PageRouteBuilder(
@@ -86,4 +88,6 @@ class _HomePageState extends State<HomePage> {
           );
         });
   }
+
+  
 }
