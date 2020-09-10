@@ -12,12 +12,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "simple discovery",
       theme: ThemeData(
-        primaryColor: Colors.green[200],
+        primaryColor: Colors.deepOrange[200],
       ),
       home: HomePage(),
-      routes: {
-        '/auth': (context) => AuthScreen()
-      },
     );
   }
 }
