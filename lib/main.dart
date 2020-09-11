@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simplediscovery_app/screens/import_screen.dart';
+import 'package:simplediscovery_app/screens/onboarding_screen.dart';
 import 'home_page.dart';
 
 void main() {
@@ -14,7 +15,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Colors.deepOrange[200],
       ),
-      home: HomePage(),
+      //home: HomePage(),
+      home: OnboardingScreen(),
     );
   }
 }

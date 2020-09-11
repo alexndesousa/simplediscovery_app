@@ -1,44 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:simplediscovery_app/screens/import_screen.dart';
 
 class CustomNavBar extends StatelessWidget {
-  const CustomNavBar({
-    Key key,
-  }) : super(key: key);
+  int currentIndex;
+  Function navigationTapped;
+
+  CustomNavBar({@required this.currentIndex, @required this.navigationTapped});
 
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          IconButton(
-              highlightColor: Colors.red,
-              icon: Icon(Icons.home),
-              onPressed: () => print("home")),
-          IconButton(
-              icon: Icon(Icons.import_export),
-              onPressed: () => Navigator.push(context, _createNoTransitionRoute(ImportScreen()))),
-          IconButton(
-              icon: Icon(Icons.search),
-              onPressed: () => print("search pressed")),
-          IconButton(
-              icon: Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: CircleAvatar(
-                  backgroundColor: Colors.grey,
-                ),
+        child: BottomNavigationBar(
+            onTap: navigationTapped,
+            currentIndex: currentIndex,
+            type: BottomNavigationBarType.fixed,
+            items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home), title: Text("Home")),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.import_export), title: Text("Import")),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.search), title: Text("Search")),
+          BottomNavigationBarItem(
+              icon: CircleAvatar(
+                radius: 12.0,
+                backgroundColor: Colors.grey,
               ),
-              onPressed: () => print("profile pressed"))
-        ],
-      ),
-    );
-  }
-
-  Route _createNoTransitionRoute(Widget screen) {
-    return PageRouteBuilder(
-        transitionDuration: Duration(milliseconds: 0),
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            screen);
+              title: Text("Profile")),
+        ]));
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:simplediscovery_app/screens/import_screen.dart';
 import 'widgets/custom_nav_bar.dart';
-import 'widgets/web_auth_widget.dart';
+import 'screens/post_auth_screen.dart';
+import 'screens/pre_auth_screen.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -8,86 +10,45 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String _text = "";
   bool authenticated;
+  int currentIndex;
+  List<Widget> children;
 
   @override
   void initState() {
     super.initState();
     authenticated = false;
+    currentIndex = 0;
     //here i can check whether or not the user is authenticated from a previous session
+    print("in initstate");
+    children = [
+      PostAuthScreen(),
+      ImportScreen()
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(
           "simple discovery",
           style: TextStyle(color: Colors.white),
         ),
         elevation: 7.0,
       ),
-      body: !authenticated ? _preAuth() : _postAuth(),
-      bottomNavigationBar: CustomNavBar(),
-    );
-  }
-
-  authCallback(value) => setState(() {
-        _text = value;
-        authenticated = true;
-      });
-
-  Widget _postAuth() {
-    return Container(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("you have successfully authenticated"),
-            Text("and your auth code is: $_text")
-          ],
-        ),
+      body: children[currentIndex],
+      bottomNavigationBar: CustomNavBar(
+        currentIndex: currentIndex,
+        navigationTapped: _navigationTapped,
       ),
     );
   }
 
-  Widget _preAuth() {
-    return Container(
-      child: Center(
-        child: Column(
-          children: [
-            FlatButton(
-              onPressed: () => Navigator.push(context, _createRoute()),
-              child: Text("auth"),
-            ),
-            Text(_text)
-          ],
-        ),
-      ),
-    );
+  void _navigationTapped(int index) {
+    setState(() {
+      currentIndex = index;
+    });
   }
-
-  Route _createRoute() {
-    return PageRouteBuilder(
-        transitionDuration: Duration(milliseconds: 250),
-        pageBuilder: (context, animation, secondaryAnimation) => WebAuthWidget(
-              callback: authCallback,
-            ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          var begin = Offset(0, 1);
-          var end = Offset.zero;
-          var curve = Curves.linear;
-
-          var tween = Tween<Offset>(begin: begin, end: end)
-              .chain(CurveTween(curve: curve));
-
-          return SlideTransition(
-            position: animation.drive(tween),
-            child: child,
-          );
-        });
-  }
-
-  
 }

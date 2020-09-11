@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:simplediscovery_app/utils/utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WebAuthWidget extends StatefulWidget {
-  
-  final Function callback;
-
-  WebAuthWidget({@required this.callback});
-
   @override
   _WebAuthWidgetState createState() => _WebAuthWidgetState();
 }
@@ -33,12 +29,10 @@ class _WebAuthWidgetState extends State<WebAuthWidget> {
       body: WebView(
         javascriptMode: JavascriptMode.unrestricted,
         onPageStarted: (message) {
-          print("started loading...");
-          print(message);
           if(message.startsWith("http://localhost:3000/")) {
             Navigator.pop(context);
             print(decodeParameters(message));
-            widget.callback("Successfully grabbed data: ${decodeParameters(message)['access_token']}");
+            _addTokenToSF(decodeParameters(message)['access_token']);
           }
         },
         onWebViewCreated: (WebViewController c) {
@@ -48,6 +42,12 @@ class _WebAuthWidgetState extends State<WebAuthWidget> {
       ),
     );
   }
+}
+
+_addTokenToSF(String value) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.setString("auth_token", value);
+  print("value added to shared prefs: $value");
 }
 
 String authUrl() {
@@ -77,4 +77,12 @@ Map<String, String> decodeParameters(String url) {
     query[Uri.decodeComponent(pair[0])] = Uri.decodeComponent(pair[1]);
   }
   return query;
+}
+
+Map<String, String> getAuthorizationHeader(String url) {
+  Map<String, String> authInfo = decodeParameters(url);
+  Map<String, String> newHeader = {
+    "Authorization" : " " + authInfo['token_type'] + " " + authInfo['access_token']
+  };
+  return newHeader;
 }
