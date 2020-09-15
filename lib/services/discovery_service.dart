@@ -23,18 +23,24 @@ class DiscoveryService {
     return body;
   }
 
-  Future<Map<String, dynamic>> getUsersPlaylists() async {
+  Future<List<dynamic>> getUsersPlaylists() async {
     var response = await http.get(
         Uri.encodeFull(baseUrl + "/me/playlists?limit=50"),
         headers: await getHeader());
     Map<String, dynamic> body = jsonDecode(response.body);
-    return body;
+    return body['items'];
+  }
+
+  Future<List<dynamic>> getSongsInPlaylist(String id) async {
+    var response = await http.get(Uri.encodeFull("$baseUrl/playlists/$id/tracks"), headers: await getHeader());
+    Map<String, dynamic> body = jsonDecode(response.body);
+    return body['items'];
   }
 
   Future<Map<String, dynamic>> artistSearch(String query) async {
     String type = "artist";
     var response = await http.get(
-        Uri.encodeFull(baseUrl + "/search?q=" + query + "&type=" + type),
+        Uri.encodeFull(baseUrl + "/search?q=$query&type=$type"),
         headers: await getHeader());
     Map<String, dynamic> body = jsonDecode(response.body);
     return body;
@@ -43,7 +49,7 @@ class DiscoveryService {
   Future<Map<String, dynamic>> songSearch(String query) async {
     String type = "track";
     var response = await http.get(
-        Uri.encodeFull(baseUrl + "/search?q=" + query + "&type=" + type),
+        Uri.encodeFull(baseUrl + "/search?q=$query&type=$type"),
         headers: await getHeader());
     Map<String, dynamic> body = jsonDecode(response.body);
     return body;
@@ -52,7 +58,7 @@ class DiscoveryService {
   Future<Map<String, dynamic>> albumSearch(String query) async {
     String type = "album";
     var response = await http.get(
-        Uri.encodeFull(baseUrl + "/search?q=" + query + "&type=" + type),
+        Uri.encodeFull(baseUrl + "/search?q=$query&type=$type"),
         headers: await getHeader());
     Map<String, dynamic> body = jsonDecode(response.body);
     return body;
