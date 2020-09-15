@@ -26,12 +26,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
 
     return IntroductionScreen(
-
       pages: [
         PageViewModel(
           titleWidget: Padding(
             padding: const EdgeInsets.all(40.0),
-            child: Text("data", style: TextStyle(fontSize: 40.0),),
+            child: Text("Simple discovery", style: TextStyle(fontSize: 40.0),),
           ),
           body: "your better music recommender",
           decoration: pageDecoration

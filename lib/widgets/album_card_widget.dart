@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:simplediscovery_app/models/import_model.dart';
+import 'package:simplediscovery_app/models/playlist.dart';
+import 'package:simplediscovery_app/models/playlist_songs_model.dart';
+import 'package:simplediscovery_app/screens/selected_playlist_screen.dart';
 import 'package:simplediscovery_app/widgets/song_tile_widget.dart';
 
-class AlbumCard extends StatefulWidget {
-  @override
-  _AlbumCardState createState() => _AlbumCardState();
-}
+class AlbumCard extends StatelessWidget {
+  final Playlist playlist;
 
-class _AlbumCardState extends State<AlbumCard> {
+  AlbumCard(this.playlist);
+
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 5,
-      child: ExpansionTile(
-        leading: Icon(Icons.crop_square),
+      child: ListTile(
+        leading: Hero(
+          tag: "playlist_image${playlist.hashCode}",
+          child: Image.network(playlist.artworkUrl),
+        ),
         trailing: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
@@ -20,31 +27,40 @@ class _AlbumCardState extends State<AlbumCard> {
               IconButton(
                 icon: Icon(Icons.crop_original),
                 color: Colors.green,
-                onPressed: () => print("hey"),
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => SelectedPlaylistScreen(playlist)))
               ),
-              Icon(Icons.keyboard_arrow_down)
             ]),
-        title: Text("Album name"),
-        subtitle: Text("more info about album"),
-        children: [
-          Container(
-            height: 200,
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                SongTile(),
-                SongTile(),
-                SongTile(),
-                SongTile(),
-                SongTile(),
-                SongTile(),
-                SongTile(),
-                SongTile(),
-                SongTile(),
-              ],
-            ),
-          )
-        ],
+        title: Hero(
+          tag: "playlist_name${playlist.hashCode}",
+          child: Material(child: Text(playlist.name)),
+        ),
+        subtitle: Hero(
+          tag: "playlist_description${playlist.hashCode}",
+          //needs to be wrapped in material otherwise you get a visual bug when hero is in flight
+          child: Material(child: Text(playlist.description)),
+        ),
+
+        // children: [
+        //   Container(
+        //     height: 200,
+        //     child: ChangeNotifierProvider(
+        //       create: (context) =>
+        //           PlaylistSongsModel()..getSongsInPlaylist(playlist),
+        //       child: Consumer<PlaylistSongsModel>(
+        //         builder: (context, import, child) {
+        //           //come up with a way to remove logic from below
+        //           return import.songs[playlist] == null
+        //               ? Text("loading")
+        //               : ListView.builder(
+        //                   itemCount: import.songs[playlist].length,
+        //                   itemBuilder: (_, index) =>
+        //                       SongTile(import.songs[playlist][index]),
+        //                 );
+        //         },
+        //       ),
+        //     ),
+        //   )
+        // ],
       ),
     );
   }
