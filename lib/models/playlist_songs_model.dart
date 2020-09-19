@@ -1,5 +1,3 @@
-
-
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
@@ -8,31 +6,44 @@ import 'package:simplediscovery_app/models/song.dart';
 import 'package:simplediscovery_app/services/discovery_service.dart';
 
 class PlaylistSongsModel extends ChangeNotifier {
-  final Map<Playlist, List<Song>> _songs = Map();
+  final List<Song> _songs = List();
+  final Playlist playlist;
+
+  PlaylistSongsModel(this.playlist);
 
   DiscoveryService service = new DiscoveryService();
 
-  UnmodifiableMapView get songs => UnmodifiableMapView(_songs);
+  UnmodifiableListView get songs => UnmodifiableListView(_songs);
 
-  
-  Future<void> getSongsInPlaylist(Playlist playlist) async {
-    await service.getSongsInPlaylist(playlist.id).then((rawSongs) async {
+  void refresh() {
+    _songs.clear();
+    getSongsInPlaylist(0);
+    notifyListeners();
+  }
+
+    Future<void> getSongsInPlaylist(int page) async {
+    await service.getSongsInPlaylist(playlist.id, page).then((rawSongs) async {
       List<Song> songs = [];
       for (final song in rawSongs) {
         String name = song['track']['name'];
         String id = song['track']['id'];
-        String image = song['track']['album']['images'][0]['url'];
         List<String> artists = [];
-        for(final artist in song['track']['artists']) {
-          if(artist['name'] != null) {
+        for (final artist in song['track']['artists']) {
+          if (artist['name'] != null) {
             artists.add(artist['name']);
           }
         }
-        songs.add(Song(id, artists.join(", "), name, image));
+        songs.add(Song(id, artists.join(", "), name));
       }
-      _songs[playlist]=songs;
-      
+      _songs.addAll(songs);
     });
     notifyListeners();
   }
+
+  void removeSong(int index) {
+    _songs.removeAt(index);
+    playlist.numberOfTracks--;
+    notifyListeners();
+  }
+
 }

@@ -19,7 +19,8 @@ class ImportModel extends ChangeNotifier {
         String name = playlist['name'];
         String description = playlist['description'];
         String id = playlist['id'];
-        _playlists.add(Playlist(artworkUrl, name, description, id));
+        int numOfTracks = playlist['tracks']['total'];
+        _playlists.add(Playlist(artworkUrl, name, description, id, numOfTracks));
       }
       notifyListeners();
     });

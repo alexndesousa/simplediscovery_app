@@ -3,7 +3,11 @@ class Song {
   final String id;
   final String artist;
   final String name;
-  final String artworkUrl;
 
-  Song(this.id, this.artist, this.name, this.artworkUrl);
+  String get getId => id;
+  String get getArtist => artist;
+  String get getName => name;
+
+  Song(this.id, this.artist, this.name);
+
 }

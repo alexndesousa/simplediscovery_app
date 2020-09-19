@@ -28,14 +28,30 @@ class DiscoveryService {
         Uri.encodeFull(baseUrl + "/me/playlists?limit=50"),
         headers: await getHeader());
     Map<String, dynamic> body = jsonDecode(response.body);
-    return body['items'];
+    String next = body['next'];
+    if (next == null) {
+      return body['items'];
+    }
+    //the following fetches the remaining user playlists if they have more than 50
+    List<dynamic> items = body['items'];
+    while (next != null) {
+      response =
+          await http.get(Uri.encodeFull(next), headers: await getHeader());
+      body = jsonDecode(response.body);
+      items.addAll(body['items']);
+      next = body['next'];
+    }
+    return items;
   }
 
-  Future<List<dynamic>> getSongsInPlaylist(String id) async {
-    var response = await http.get(Uri.encodeFull("$baseUrl/playlists/$id/tracks"), headers: await getHeader());
+  Future<List<dynamic>> getSongsInPlaylist(String id, int page) async {
+    var response = await http.get(
+        Uri.encodeFull("$baseUrl/playlists/$id/tracks?offset=${page*100}"),
+        headers: await getHeader());
     Map<String, dynamic> body = jsonDecode(response.body);
     return body['items'];
   }
+
 
   Future<Map<String, dynamic>> artistSearch(String query) async {
     String type = "artist";
