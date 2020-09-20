@@ -31,7 +31,6 @@ class _WebAuthWidgetState extends State<WebAuthWidget> {
         onPageStarted: (message) {
           if(message.startsWith("http://localhost:3000/")) {
             Navigator.pop(context);
-            print(decodeParameters(message));
             _addTokenToSF(decodeParameters(message)['access_token']);
           }
         },
@@ -47,7 +46,6 @@ class _WebAuthWidgetState extends State<WebAuthWidget> {
 _addTokenToSF(String value) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setString("auth_token", value);
-  print("value added to shared prefs: $value");
 }
 
 String authUrl() {

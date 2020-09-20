@@ -25,7 +25,7 @@ class AlbumCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               IconButton(
-                icon: Icon(Icons.crop_original),
+                icon: Icon(Icons.arrow_forward),
                 color: Colors.green,
                 onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => SelectedPlaylistScreen(playlist)))
               ),

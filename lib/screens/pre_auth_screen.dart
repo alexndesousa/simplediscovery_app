@@ -31,8 +31,7 @@ class _PreAuthScreenState extends State<PreAuthScreen> {
             FlatButton(
               color: Colors.orange,
               onPressed: () async {
-                Map<String, dynamic> response = await (DiscoveryService().getUserProfileInformation());
-                print(response);
+                await DiscoveryService().getUserProfileInformation();
               },
               child: Text("auth"),
             ),

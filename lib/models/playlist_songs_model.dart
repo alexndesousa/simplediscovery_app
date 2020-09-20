@@ -17,12 +17,12 @@ class PlaylistSongsModel extends ChangeNotifier {
 
   void refresh() {
     _songs.clear();
-    getSongsInPlaylist(0);
+    getSongsInPlaylistPaginated(0);
     notifyListeners();
   }
 
-    Future<void> getSongsInPlaylist(int page) async {
-    await service.getSongsInPlaylist(playlist.id, page).then((rawSongs) async {
+    Future<void> getSongsInPlaylistPaginated(int page) async {
+    await service.getSongsInPlaylistPaginated(playlist.id, page).then((rawSongs) async {
       List<Song> songs = [];
       for (final song in rawSongs) {
         String name = song['track']['name'];
