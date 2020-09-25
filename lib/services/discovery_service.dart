@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
-
 class DiscoveryService {
   String baseUrl = 'https://api.spotify.com/v1';
 
@@ -16,31 +15,25 @@ class DiscoveryService {
   Dio dio = Dio();
 
   DiscoveryService() {
-    dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (RequestOptions options) async {
-        return options;
-      },
-      onResponse: (Response response) async {
-        return response;
-      },
-      onError: (DioError e) async {
-        print("error code: ${e.response.statusCode}");
-        print("path: ${e.request.path}");
-        //isLocked = true;
-        
-        if(e.response != null && e.response.statusCode == 429) {
-          dio.interceptors.requestLock.lock();
-          await Future.delayed(Duration(seconds: int.parse(e.response.headers['Retry-After'][0])));
-          responseCompleter.complete(dio.get(e.request.path, options: Options(headers: e.request.headers)));
-          dio.interceptors.requestLock.unlock();
-          return responseCompleter.future;
-        }
-        //await sleepRequest(int.parse(e.response.headers['Retry-After'][0]), e.request.path, e.request.headers);
-        return e;
-        //isLocked = false;
-        
+    dio.interceptors
+        .add(InterceptorsWrapper(onRequest: (RequestOptions options) async {
+      return options;
+    }, onResponse: (Response response) async {
+      
+      //print("yo it still came through the response ${response.statusCode}, number: ${response.request.extra['number']}");
+      return response;
+    }, onError: (DioError e) async {
+      print("but yet, there was an error ${e.error}, number: ${e.request.extra['number']}");
+      if(e.response.statusCode == 400) {
+        dio.interceptors.requestLock.lock();
+        print("need to reauthenticate") ;
+        dio.interceptors.requestLock.unlock();
       }
-    ));
+      var response = await dio.get(e.request.path + "e",
+          options: Options(headers: e.request.headers, extra: {"number":e.request.extra['number']}));
+      //also need to limit the amount of times a request gets retried. It'll prevent infinite loops from forming
+      return response;
+    }));
   }
 
   getHeader() async {
@@ -71,8 +64,8 @@ class DiscoveryService {
     //the following fetches the remaining user playlists if they have more than 50
     List<dynamic> items = body['items'];
     while (next != null) {
-      response =
-          await dio.get(Uri.encodeFull(next), options: Options(headers: await getHeader()));
+      response = await dio.get(Uri.encodeFull(next),
+          options: Options(headers: await getHeader()));
       body = response.data;
       items.addAll(body['items']);
       next = body['next'];
@@ -99,7 +92,8 @@ class DiscoveryService {
 
   Future<List<dynamic>> getSongsInPlaylistPaginated(String id, int page) async {
     var response = await dio.get(
-        Uri.encodeFull("$baseUrl/playlists/$id/tracks?offset=${page * 100}"),options: Options(headers: await getHeader()));
+        Uri.encodeFull("$baseUrl/playlists/$id/tracks?offset=${page * 100}"),
+        options: Options(headers: await getHeader()));
     Map<String, dynamic> body = response.data;
     return body['items'];
   }
@@ -107,7 +101,8 @@ class DiscoveryService {
   Future<Map<String, dynamic>> artistSearch(String query) async {
     String type = "artist";
     var response = await dio.get(
-        Uri.encodeFull(baseUrl + "/search?q=$query&type=$type"),options: Options(headers: await getHeader()));
+        Uri.encodeFull(baseUrl + "/search?q=$query&type=$type"),
+        options: Options(headers: await getHeader()));
     Map<String, dynamic> body = response.data;
     return body;
   }
@@ -115,7 +110,8 @@ class DiscoveryService {
   Future<Map<String, dynamic>> songSearch(String query) async {
     String type = "track";
     var response = await dio.get(
-        Uri.encodeFull(baseUrl + "/search?q=$query&type=$type"),options: Options(headers: await getHeader()));
+        Uri.encodeFull(baseUrl + "/search?q=$query&type=$type"),
+        options: Options(headers: await getHeader()));
     Map<String, dynamic> body = response.data;
     return body;
   }
@@ -123,14 +119,16 @@ class DiscoveryService {
   Future<Map<String, dynamic>> albumSearch(String query) async {
     String type = "album";
     var response = await dio.get(
-        Uri.encodeFull(baseUrl + "/search?q=$query&type=$type"),options: Options(headers: await getHeader()));
+        Uri.encodeFull(baseUrl + "/search?q=$query&type=$type"),
+        options: Options(headers: await getHeader()));
     Map<String, dynamic> body = response.data;
     return body;
   }
 
   Future<Map<String, dynamic>> getSimilarArtists(String artistId) async {
     var response = await dio.get(
-        Uri.encodeFull(baseUrl + "/artists/" + artistId + "related-artists"),options: Options(headers: await getHeader()));
+        Uri.encodeFull(baseUrl + "/artists/" + artistId + "related-artists"),
+        options: Options(headers: await getHeader()));
     Map<String, dynamic> body = response.data;
     return body;
   }
@@ -138,9 +136,16 @@ class DiscoveryService {
   Future<List<Map<String, dynamic>>> getMultipleSimilarArtists(
       List<String> artistIds) async {
     var header = await getHeader();
-    //print("header");
-    var responses = await Future.wait(artistIds.map((artistId) => dio.get(
-        Uri.encodeFull(baseUrl + "/artists/" + artistId + "/related-artists"),options: Options(headers: header))));
+    var responses = [];
+    for(final artistId in artistIds) {
+      var response = await dio.get(
+        Uri.encodeFull(baseUrl + "/artists/" + artistId + "/related-artists"),
+        options: Options(headers: header));
+        responses.add(response);
+    }
+    // var responses = await Future.wait(artistIds.map((artistId) => dio.get(
+    //     Uri.encodeFull(baseUrl + "/artists/" + artistId + "/related-artists"),
+    //     options: Options(headers: header))));
 
     List<Map<String, dynamic>> body = [];
     for (final response in responses) {
@@ -153,17 +158,24 @@ class DiscoveryService {
   Future<List<Map<String, dynamic>>> getMultipleArtistsTopSongs(
       List<String> artistIds, String country) async {
     var header = await getHeader();
-    //print("starting the wait");
-    //await Future.delayed(Duration(seconds: 5));
-    //print("finished the wait");
-    var responses = await Future.wait(artistIds.map((artistId) => dio.get(
+    var responses = [];
+    for(final artistId in artistIds) {
+      var response = await dio.get(
         Uri.encodeFull("$baseUrl/artists/$artistId/top-tracks?country=GB"),
-        options: Options(headers: header))));
-    //print("got alla them responses");
-    //print(responses);
+        options: Options(headers: header));
+      responses.add(response);
+    }
+
+    // var responses = await Future.wait(artistIds.map((artistId) => dio.get(
+    //     Uri.encodeFull("$baseUrl/artists/$artistId/top-tracks?country=GB"),
+    //     options: Options(headers: header))));
     List<Map<String, dynamic>> body = [];
     for (final response in responses) {
-      body.add(response.data);
+      try {
+        body.add(response.data);
+      } on Exception catch (e) {
+        print(e);
+      }
       //print(response.data);
     }
     return body;
